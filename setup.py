@@ -1,7 +1,9 @@
 from setuptools import setup, find_packages
 
 install_requires = [
-    # "gurobipy",  # install this manually
+    # "gurobipy",  	# install this manually
+    # "alib",      	# install this manually
+    # "vnep_approx" , 	# install this manually 
     "matplotlib",
     "numpy",
     "click",
