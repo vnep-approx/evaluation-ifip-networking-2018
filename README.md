@@ -228,7 +228,7 @@ the algorithm would be executed twice: once with a time limit of 10 minutes and 
 
 # Contact
 
-If you have any questions, simply write a mail to mrost<AT>inet.tu-berlin<DOT>de.
+If you have any questions, simply write a mail to mrost(AT)inet.tu-berlin(DOT)de.
 
 # Acknowledgement
 
