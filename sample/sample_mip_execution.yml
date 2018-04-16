@@ -1,0 +1,11 @@
+SCENARIO_INPUT_PICKLE: "sample_scenarios.pickle"
+RESULT_OUTPUT_PICKLE:  "sample_scenarios_results_mip.pickle"
+
+RUN_PARAMETERS:
+    - ALGORITHM:
+        ID: ClassicMCF
+            
+        GUROBI_PARAMETERS:
+            timelimit: [10800]
+            threads: [1]
+            mipGap: [0.01]

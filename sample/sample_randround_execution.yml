@@ -1,0 +1,12 @@
+SCENARIO_INPUT_PICKLE: "sample_scenarios.pickle"
+RESULT_OUTPUT_PICKLE:  "sample_scenarios_results_randround.pickle"
+
+RUN_PARAMETERS:
+    - ALGORITHM:
+        ID: RandomizedRoundingTriumvirate
+
+        GUROBI_PARAMETERS:
+            timelimit: [3600]
+            threads: [1]
+            numericfocus: [2]
+            method: [2]
