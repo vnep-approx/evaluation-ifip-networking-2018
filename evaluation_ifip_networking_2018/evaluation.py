@@ -1,3 +1,26 @@
+# MIT License
+#
+# Copyright (c) 2016-2018 Matthias Rost, Elias Doehne, Alexander Elvers
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+#
+
 """This is the evaluation and plotting module.
 
 This module handles all plotting related evaluation.
@@ -29,8 +52,8 @@ logger = util.get_logger(__name__, make_file=False, propagate=True)
 
 class HeatmapPlotType(object):
     Simple_MCF = 0              #a plot only for ClassicMCFResult data
-    Simple_RRT = 1              #a plot only for RandomizedRoundingTriumvirat data
-    Comparison_MCF_vs_RRT = 2   #a plot comparing ClassicMCFResult with RandomizedRoundingTriumvirat
+    Simple_RRT = 1              #a plot only for RandomizedRoundingTriumvirate data
+    Comparison_MCF_vs_RRT = 2   #a plot comparing ClassicMCFResult with RandomizedRoundingTriumvirate
     VALUE_RANGE = range(Simple_MCF, Comparison_MCF_vs_RRT+1)
 
 """
@@ -236,22 +259,22 @@ heatmap_specification_runtime_mdk_runtime = dict(
 )
 
 
-heatmap_specification_comparison_baseline_mdk = dict(
-    name="Relative Performance\nMDK [%]",
-    filename="comparison_baseline_mdk",
+heatmap_specification_comparison_baseline_rr_mdk = dict(
+    name="Heuristic Rounding Performance      \n$\mathrm{Profit}({\mathrm{RR}_{\mathrm{MDK}}}) / \mathrm{Profit}({\mathrm{MIP}_{\mathrm{MCF}}})$ [%]     ",
+    filename="comparison_baseline_rr_mdk",
     vmin=50.0,
-    vmax=100.0,
-    colorbar_ticks=[x for x in range(50, 101, 10)],
+    vmax=100,
+    colorbar_ticks=[x for x in range(50,101,10)],
     cmap="Reds",
     plot_type=HeatmapPlotType.Comparison_MCF_vs_RRT,
     lookup_function=lambda mcf_result, rrt_result: (
         (rrt_result.mdk_result.profit / mcf_result.status.objValue) * 100 if mcf_result.status.objValue > 0.000001
-        else np.NaN),
+        else np.NaN)
 )
 
-heatmap_specification_comparison_baseline_wo_vio = dict(
+heatmap_specification_comparison_baseline_rr_heuristic = dict(
     name="Heuristic Rounding Performance      \n$\mathrm{Profit}({\mathrm{RR}_{\mathrm{Heuristic}}}) / \mathrm{Profit}({\mathrm{MIP}_{\mathrm{MCF}}})$ [%]     ",
-    filename="comparison_baseline_rr",
+    filename="comparison_baseline_rr_heuristic",
     vmin=50.0,
     vmax=100,
     colorbar_ticks=[x for x in range(50,101,10)],
@@ -260,6 +283,34 @@ heatmap_specification_comparison_baseline_wo_vio = dict(
     lookup_function=lambda mcf_result, rrt_result: (
         (rrt_result.result_wo_violations.profit / mcf_result.status.objValue) * 100 if mcf_result.status.objValue > 0.000001
         else np.NaN)
+)
+
+heatmap_specification_comparison_baseline_rr_min_load = dict(
+    name="Heuristic Rounding Performance      \n$\mathrm{Profit}({\mathrm{RR}_{\mathrm{MinLoad}}}) / \mathrm{Profit}({\mathrm{MIP}_{\mathrm{MCF}}})$ [%]     ",
+    filename="comparison_baseline_rr_min_load",
+    vmin=95.0,
+    vmax=145.0,
+    colorbar_ticks=[x for x in range(95,146,10)],
+    cmap="Reds",
+    plot_type=HeatmapPlotType.Comparison_MCF_vs_RRT,
+    lookup_function=lambda mcf_result, rrt_result: (
+        (rrt_result.collection_of_samples_with_violations[0].profit / mcf_result.status.objValue) * 100 if mcf_result.status.objValue > 0.000001
+        else np.NaN),
+    rounding_function=lambda x: int(round(x))
+)
+
+heatmap_specification_comparison_baseline_rr_max_profit = dict(
+    name="Heuristic Rounding Performance      \n$\mathrm{Profit}({\mathrm{RR}_{\mathrm{MaxProfit}}}) / \mathrm{Profit}({\mathrm{MIP}_{\mathrm{MCF}}})$ [%]     ",
+    filename="comparison_baseline_rr_max_profit",
+    vmin=95.0,
+    vmax=145.0,
+    colorbar_ticks=[x for x in range(95,146,10)],
+    cmap="Reds",
+    plot_type=HeatmapPlotType.Comparison_MCF_vs_RRT,
+    lookup_function=lambda mcf_result, rrt_result: (
+        (rrt_result.collection_of_samples_with_violations[1].profit / mcf_result.status.objValue) * 100 if mcf_result.status.objValue > 0.000001
+        else np.NaN),
+    rounding_function=lambda x: int(round(x))
 )
 
 global_heatmap_specfications = [
@@ -277,8 +328,10 @@ global_heatmap_specfications = [
     heatmap_specification_runtime_randround_preprocessing,
     heatmap_specification_runtime_randround_optimization,
     heatmap_specification_runtime_randround_postprocessing,
-    heatmap_specification_comparison_baseline_mdk,
-    heatmap_specification_comparison_baseline_wo_vio,
+    heatmap_specification_comparison_baseline_rr_mdk,
+    heatmap_specification_comparison_baseline_rr_heuristic,
+    heatmap_specification_comparison_baseline_rr_min_load,
+    heatmap_specification_comparison_baseline_rr_max_profit,
     heatmap_specification_runtime_randround_runtime,
     heatmap_specification_runtime_mdk_runtime,
 ]
@@ -327,6 +380,9 @@ global_heatmap_axes_specifications = [heatmap_axes_specification_requests_edge_l
 
 
 def compute_average_node_load(result_summary):
+    logger.warn("In the function compute_average_node_load the single universal node type 'univerval' is assumed."
+                "This should be fixed in the future and might yield wrong results when considering more general "
+                "resource types. Disregard this warning if you know what you are doing.")
     cum_loads = []
     for (x, y) in result_summary.load.keys():
         if x == "universal":
@@ -335,6 +391,9 @@ def compute_average_node_load(result_summary):
 
 
 def compute_average_edge_load(result_summary):
+    logger.warn("In the function compute_average_edge_load the single universal node type 'univerval' is assumed."
+                "This should be fixed in the future and might yield wrong results when considering more general "
+                "resource types. Disregard this warning if you know what you are doing.")
     cum_loads = []
     for (x, y) in result_summary.load.keys():
         if x != "universal":
@@ -343,6 +402,9 @@ def compute_average_edge_load(result_summary):
 
 
 def compute_max_node_load(result_summary):
+    logger.warn("In the function compute_max_node_load the single universal node type 'univerval' is assumed."
+                "This should be fixed in the future and might yield wrong results when considering more general "
+                "resource types.  Disregard this warning if you know what you are doing.")
     cum_loads = []
     for (x, y) in result_summary.load.keys():
         if x == "universal":
@@ -351,6 +413,9 @@ def compute_max_node_load(result_summary):
 
 
 def compute_max_edge_load(result_summary):
+    logger.warn("In the function compute_max_edge_load the single universal node type 'univerval' is assumed."
+                "This should be fixed in the future and might yield wrong results when considering more general "
+                "resource types. Disregard this warning if you know what you are doing.")
     cum_loads = []
     for (x, y) in result_summary.load.keys():
         if x != "universal":
@@ -375,6 +440,9 @@ def compute_max_load(result_summary):
 
 def select_scenarios_with_high_objective_gap_or_zero_requests(dc_baseline, algorithm_name,
                                                               output_respective_generation_parameters=True):
+    ''' Function to select scenarios with high objective gap or no requests. This function is not used anymore but
+        is left here for future usage.
+    '''
     scenario_ids = dc_baseline.algorithm_scenario_solution_dictionary[algorithm_name].keys()
 
     result = []
@@ -417,21 +485,6 @@ def select_scenarios_with_high_objective_gap_or_zero_requests(dc_baseline, algor
 
     print "{} many scenarios experienced a very, very high gap or contained 0 requests".format(len(result))
     return result
-
-
-
-def get_base_filename(metric_specification, heatmap_axes_specification, filter_specifications):
-    ''' Returns the basename for plotted file
-
-    :param metric_specification:
-    :param heatmap_axes_specification:
-    :param filter_specifications:
-    :return:
-    '''
-    raise RuntimeError("This is deprecated. TODO: remove")
-    return metric_specification['filename'] + "___" + heatmap_axes_specification['foldername'] + "__" + "_".join(
-        [filter_specification['parameter'] + "_" + str(filter_specification['value']) for filter_specification in
-         filter_specifications])
 
 
 def get_title_for_filter_specifications(filter_specifications):
@@ -505,12 +558,30 @@ def lookup_scenarios_having_specific_values(scenario_parameter_space_dict, path,
     # print current_dict
     return current_dict[value]
 
+def lookup_scenario_parameter_room_dicts_on_path(scenario_parameter_space_dict, path):
+    current_path = path[:]
+    current_dict_or_list = scenario_parameter_space_dict
+    dicts_on_path = []
+    while len(current_path) > 0:
+        dicts_on_path.append(current_dict_or_list)
+        if isinstance(current_path[0], basestring):
+            current_dict_or_list = current_dict_or_list[current_path[0]]
+            current_path.pop(0)
+        elif isinstance(current_path[0], int):
+            current_dict_or_list = current_dict_or_list[int(current_path[0])]
+            current_path.pop(0)
+        else:
+            raise RuntimeError("Could not lookup dicts.")
+    return dicts_on_path
+
 def load_reduced_pickle(reduced_pickle):
     with open(reduced_pickle, "rb") as f:
         data = pickle.load(f)
     return data
 
 class AbstractPlotter(object):
+    ''' Abstract Plotter interface providing functionality used by the majority of plotting classes of this module.
+    '''
 
     def __init__(self,
                  output_path,
@@ -552,10 +623,7 @@ class AbstractPlotter(object):
         if filter_specifications:
             filter_spec_path, filter_filename = self._construct_path_and_filename_for_filter_spec(filter_specifications)
         base = os.path.normpath(OUTPUT_PATH)
-        if self.paper_mode:
-            date = "2018-04-07"
-        else:
-            date = strftime("%Y-%m-%d", gmtime())
+        date = strftime("%Y-%m-%d", gmtime())
         output_path = os.path.join(base, date, OUTPUT_FILETYPE, "general_plots", filter_spec_path)
         filename = os.path.join(output_path, title + "_" + filter_filename)
         return output_path, filename
@@ -648,10 +716,7 @@ class SingleHeatmapPlotter(AbstractPlotter):
         if filter_specifications:
             filter_spec_path, filter_filename = self._construct_path_and_filename_for_filter_spec(filter_specifications)
         base = os.path.normpath(OUTPUT_PATH)
-        if self.paper_mode:
-            date = "2018-04-07"
-        else:
-            date = strftime("%Y-%m-%d", gmtime())
+        date = strftime("%Y-%m-%d", gmtime())
         axes_foldername = heatmap_axes_specification['foldername']
         output_path = os.path.join(base, date, OUTPUT_FILETYPE, axes_foldername, filter_spec_path)
         filename = os.path.join(output_path, metric_specification['filename'] + "_" + filter_filename)
@@ -876,8 +941,8 @@ class ComparisonBaselineVsRRT_Scatter_and_ECDF(AbstractPlotter):
         super(ComparisonBaselineVsRRT_Scatter_and_ECDF, self).__init__(output_path, output_filetype, baseline_solution_storage,
                                                                        baseline_algorithm_id, baseline_execution_id, show_plot, save_plot,
                                                                        overwrite_existing_files, forbidden_scenario_ids, paper_mode)
-        if randround_algorithm_id != "RandomizedRoundingTriumvirat":
-            raise RuntimeError("The capacity violation plot can only be applied to RandomizedRoundingTriumvirat results.")
+        if randround_algorithm_id != "RandomizedRoundingTriumvirate":
+            raise RuntimeError("The capacity violation plot can only be applied to RandomizedRoundingTriumvirate results.")
 
         self.randround_solution_storage = randround_solution_storage
         self.randround_algorithm_id = randround_algorithm_id
@@ -892,16 +957,23 @@ class ComparisonBaselineVsRRT_Scatter_and_ECDF(AbstractPlotter):
                             'mdk':          "multi-dimensional knapsack",
                             'baseline':     "baseline"}
 
+
+        self.math_label_names = {'min_aug':      "\mathrm{RR}_{\mathrm{MinLoad}}",
+                                 'max_profit':   "\mathrm{RR}_{\mathrm{MaxProfit}}",
+                                 'wo_viol':      "\mathrm{RR}_{\mathrm{Heuristic}}",
+                                 'mdk':          "\mathrm{RR}_{\mathrm{MDK}}",
+                                 'baseline':     "\mathrm{MIP}_{\mathrm{MCF}}"}
+
         self.markers = {'min_aug':      "o",
                         'max_profit':   "v",
                         'wo_viol':      "x",
                         'mdk':          "+",
                         'baseline':     "^"}
 
-        self.colors = {'min_aug':       "r",
-                        'max_profit':   "g",
-                        'wo_viol':      "b",
-                        'mdk':          "grey",
+        self.colors = {'min_aug':       "salmon",
+                        'max_profit':   "darkred",
+                        'wo_viol':      "g",
+                        'mdk':          "b",
                         'baseline':     "k"}
 
         self._randround_data_lookups = {'min_aug': (lambda x: x.collection_of_samples_with_violations[0]),
@@ -1069,6 +1141,7 @@ class ComparisonBaselineVsRRT_Scatter_and_ECDF(AbstractPlotter):
 
     def plot_figure(self, filter_specifications):
         self.plot_figure_ecdf_load(filter_specifications)
+        self.plot_figure_ecdf_objective(filter_specifications)
         self.plot_bound_ecdf(filter_specifications)
         self.plot_scatter_obj_vs_load(filter_specifications)
 
@@ -1093,11 +1166,11 @@ class ComparisonBaselineVsRRT_Scatter_and_ECDF(AbstractPlotter):
 
         result = self.compute_maximal_load_arrays(scenario_ids)
 
-        fix, ax = plt.subplots(figsize=(6, 5))
+        fix, ax = plt.subplots(figsize=(5, 4))
 
         #cum_line = matplotlib.lines.Line2D([], [], color='k', linestyle="-", label='total')
-        node_line = matplotlib.lines.Line2D([], [], color='k', linestyle="-.", label='node')
-        edge_line = matplotlib.lines.Line2D([], [], color='k', linestyle="-", label='edge')
+        node_line = matplotlib.lines.Line2D([], [], color='gray', linestyle="-.", label='node')
+        edge_line = matplotlib.lines.Line2D([], [], color='gray', linestyle="-", label='edge')
 
         second_legend_handlers = []
         max_observed_value = 0
@@ -1110,22 +1183,83 @@ class ComparisonBaselineVsRRT_Scatter_and_ECDF(AbstractPlotter):
 
             yvals = np.arange(1,len(sorted_data_node)+1) / float(len(sorted_data_node))
 
-            second_legend_handlers.append(matplotlib.lines.Line2D([], [], color=self.colors[data_name], linestyle="-", label=self.label_names[data_name]))
+            second_legend_handlers.append(matplotlib.lines.Line2D([], [], color=self.colors[data_name], linestyle="-", label="${}$".format(self.math_label_names[data_name])))
 
             #ax.plot(sorted_data_cum, yvals, color=self.colors[data_name], linestyle="-")
             ax.plot(sorted_data_node, yvals, color=self.colors[data_name], linestyle="-.")
             ax.plot(sorted_data_edge, yvals, color=self.colors[data_name], linestyle="-")
 
-        first_legend = plt.legend(handles=[node_line, edge_line], loc=6)
+        first_legend = plt.legend(handles=[node_line, edge_line], loc=4, fontsize=14, title="Resource", handletextpad=.35, borderaxespad=0.175, borderpad=0.2)
+        plt.setp(first_legend.get_title(), fontsize=14)
         plt.gca().add_artist(first_legend)
-        plt.legend(handles=second_legend_handlers, loc=2)
+        second_legend = plt.legend(handles=second_legend_handlers, loc=2, fontsize=14, title="Algorithm", handletextpad=.35, borderaxespad=0.175, borderpad=0.2)
+        plt.setp(second_legend.get_title(), fontsize=14)
 
-        ax.set_title("ECDF of Relative Loads")
-        ax.set_xlabel("load [%]")
-        ax.set_ylabel("ECDF")
-        ax.grid(True, which="both")
+        ax.set_xlim(10, max_observed_value * 1.1)
         ax.set_xscale("log", basex=10)
-        ax.set_xlim(10,max_observed_value*1.1)
+        ax.get_xaxis().set_major_formatter(matplotlib.ticker.ScalarFormatter())
+
+        ax.set_xticks([10, 50, 100, 200, 500], minor=False)
+        ax.set_xticks([20,30,40,50,60,70,80,90, 300,400], minor=True)
+
+        ax.set_title("ECDF of Resource Loads",fontsize=17)
+        ax.set_xlabel("Maximum Resource Load [%]", fontsize=16)
+        ax.set_ylabel("ECDF", fontsize=16)
+        ax.grid(True, which="both")
+
+
+        ax.tick_params(axis='both', which='major', labelsize=15.5)
+        ax.tick_params(axis='x', which='minor', labelsize=15.5)
+        plt.grid(True, which="both")
+
+        plt.tight_layout()
+
+        self._show_and_or_save_plots(output_path, filename)
+
+
+
+    def plot_figure_ecdf_objective(self, filter_specifications):
+
+        output_filename = "ECDF_objective"
+
+        output_path, filename = self._construct_output_path_and_filename(output_filename,
+                                                                         filter_specifications)
+
+        logger.debug("output_path is {};\t filename is {}".format(output_path, filename))
+
+        if not self.overwrite_existing_files and os.path.exists(filename):
+            logger.info("Skipping generation of {} as this file already exists".format(filename))
+            return
+
+
+        scenario_ids = self._obtain_scenarios_based_on_filters(filter_specifications)
+
+        if self.forbidden_scenario_ids:
+            scenario_ids = scenario_ids - self.forbidden_scenario_ids
+
+        result = self.compute_relative_profits_arrays(scenario_ids)
+
+        fix, ax = plt.subplots(figsize=(5, 4))
+
+        max_observed_value = 0
+        for data_name in self._randround_data_names:
+            sorted_data = np.sort(result[data_name])
+            max_observed_value = np.maximum(max_observed_value, sorted_data[-1])
+
+            yvals = np.arange(1,len(sorted_data)+1) / float(len(sorted_data))
+
+            ax.plot(sorted_data, yvals, color=self.colors[data_name], linestyle="-", label="${}$".format(self.math_label_names[data_name]))
+
+        leg = plt.legend(loc=4, title="Algorithm", fontsize=14, handletextpad=.35, borderaxespad=0.175, borderpad=0.2)
+        plt.setp(leg.get_title(), fontsize=14)
+
+        ax.set_title("ECDF of Relative Achieved Profit", fontsize=17)
+        ax.set_xlabel("$\mathrm{Profit}({\mathrm{RR}_{\mathrm{Alg}}}) / \mathrm{Profit}({\mathrm{MIP}_{\mathrm{MCF}}})$ [%] ", fontsize=16)
+        ax.set_ylabel("ECDF", fontsize=16)
+        ax.grid(True, which="both")
+        ax.tick_params(axis='both', which='major', labelsize=15.5)
+        #ax.set_xscale("log", basex=10)
+        ax.set_xlim(20,max_observed_value*1.1)
         plt.tight_layout()
 
         self._show_and_or_save_plots(output_path, filename)
@@ -1182,7 +1316,7 @@ class ComparisonBaselineVsRRT_Scatter_and_ECDF(AbstractPlotter):
 
             number_requests_legend_handlers.append(matplotlib.lines.Line2D([], [], color=colors[i], linestyle="-", label='{}'.format(number_of_requests)))
 
-        root_legend_handlers = [matplotlib.lines.Line2D([], [], color='k', linestyle="-", label='initial'), matplotlib.lines.Line2D([], [], color='k', linestyle=":", label='final')]
+        root_legend_handlers = [matplotlib.lines.Line2D([], [], color='gray', linestyle="-", label='initial'), matplotlib.lines.Line2D([], [], color='gray', linestyle=":", label='final')]
 
         first_legend = plt.legend(title="Bound($\mathrm{MIP}_{\mathrm{MCF}})$", handles=root_legend_handlers, loc=(0.225,0.0125), fontsize=14, handletextpad=0.35, borderaxespad=0.175, borderpad=0.2)
         plt.setp(first_legend.get_title(), fontsize='15')
@@ -1221,65 +1355,65 @@ class ComparisonBaselineVsRRT_Scatter_and_ECDF(AbstractPlotter):
 
     def plot_scatter_obj_vs_load(self, filter_specifications):
 
-        output_filename = "SCATTER_obj_vs_load"
+        bounding_boxes = {'min_aug':      [[50,140],[85,235]],
+                          'max_profit':   [[95,210],[90,505]],
+                          'wo_viol':      [[30  ,105],[75,102]],
+                          'mdk':          [[15,105],[75,102]]}
 
-        output_path, filename = self._construct_output_path_and_filename(output_filename,
-                                                                         filter_specifications)
 
-        logger.debug("output_path is {};\t filename is {}".format(output_path, filename))
+        for data_to_plot in self._randround_data_names:
 
-        if not self.overwrite_existing_files and os.path.exists(filename):
-            logger.info("Skipping generation of {} as this file already exists".format(filename))
-            return
+            bounding_box_x = bounding_boxes[data_to_plot][0]
+            bounding_box_y = bounding_boxes[data_to_plot][1]
 
-        # if filter_specifications:
-        #     for filter_specification in filter_specifications:
-        #         if filter_specification["parameter"] == "number_of_requests":
-        #             logger.info("Skipping generation of {} as this conflicts with the filter specification {}".format(output_filename, filter_specification))
-        #             return
+            output_filename = "SCATTER_obj_vs_load_{}".format(data_to_plot)
 
-        fix, ax = plt.subplots(figsize=(5, 4))
-        colors = list(self.colors.values())
-        markers = list(self.markers.values())
+            output_path, filename = self._construct_output_path_and_filename(output_filename,
+                                                                             filter_specifications)
 
-        filter_path_NRF, node_resource_factors = extract_parameter_range(self.scenarioparameter_room,
-                                                                         "node_resource_factor")
+            logger.debug("output_path is {};\t filename is {}".format(output_path, filename))
 
-        filter_path_ERF, edge_resource_factors = extract_parameter_range(self.scenarioparameter_room,
-                                                                         "edge_resource_factor")
+            if not self.overwrite_existing_files and os.path.exists(filename):
+                logger.info("Skipping generation of {} as this file already exists".format(filename))
+                return
 
-        color_norm = matplotlib.colors.Normalize(vmin=0, vmax=6)
-        scalar_map = matplotlib.cm.ScalarMappable(norm=color_norm, cmap='inferno')
+            fix, ax = plt.subplots(figsize=(5, 4))
+            colors = list(self.colors.values())
+            markers = list(self.markers.values())
 
-        observed_values_relative_profit = np.empty(0)
-        observed_values_load = np.empty(0)
+            filter_path_NRF, node_resource_factors = extract_parameter_range(self.scenarioparameter_room,
+                                                                             "node_resource_factor")
 
-        number_of_not_shown_values = 0
-        bounding_box_x = [50, 150]
-        bounding_box_y = [85, 235]
+            filter_path_ERF, edge_resource_factors = extract_parameter_range(self.scenarioparameter_room,
+                                                                             "edge_resource_factor")
 
-        for i, nrf in enumerate(node_resource_factors):
-            for j, erf in enumerate(edge_resource_factors):
+            color_norm = matplotlib.colors.Normalize(vmin=0, vmax=6)
+            scalar_map = matplotlib.cm.ScalarMappable(norm=color_norm, cmap='inferno')
 
-                scenario_ids = self._obtain_scenarios_based_on_filters([] +
-                                                                       [
-                                                                           {"parameter": "node_resource_factor",
-                                                                            "value": nrf},
-                                                                           {"parameter": "edge_resource_factor",
-                                                                            "value": erf},
-                                                                       ])
-                if self.forbidden_scenario_ids:
-                    scenario_ids = scenario_ids - self.forbidden_scenario_ids
+            observed_values_relative_profit = np.empty(0)
+            observed_values_load = np.empty(0)
 
-                list_of_scenarios = list(scenario_ids)
+            number_of_not_shown_values = 0
 
-                result_relative_profits = self.compute_relative_profits_arrays(list_of_scenarios)
+            for i, nrf in enumerate(node_resource_factors):
+                for j, erf in enumerate(edge_resource_factors):
 
-                raw_result_loads = self.compute_maximal_load_arrays(list_of_scenarios)
+                    scenario_ids = self._obtain_scenarios_based_on_filters([] +
+                                                                           [
+                                                                               {"parameter": "node_resource_factor",
+                                                                                "value": nrf},
+                                                                               {"parameter": "edge_resource_factor",
+                                                                                "value": erf},
+                                                                           ])
+                    if self.forbidden_scenario_ids:
+                        scenario_ids = scenario_ids - self.forbidden_scenario_ids
 
-                datas_to_plot = ["min_aug"]  # , "wo_viol"]#, "max_profit"]
+                    list_of_scenarios = list(scenario_ids)
 
-                for data_to_plot in datas_to_plot:
+                    result_relative_profits = self.compute_relative_profits_arrays(list_of_scenarios)
+
+                    raw_result_loads = self.compute_maximal_load_arrays(list_of_scenarios)
+
                     result_cum_loads = np.maximum(raw_result_loads[data_to_plot][0],
                                                   raw_result_loads[data_to_plot][1])
 
@@ -1301,343 +1435,50 @@ class ComparisonBaselineVsRRT_Scatter_and_ECDF(AbstractPlotter):
                                result_cum_loads,
                                c=matplotlib.colors.to_hex(scalar_map.to_rgba(j)),
                                marker="s",
-                               #marker=markers[j],
                                label="{}".format(erf),
                                s=6, linewidths=.1, alpha=.8)
 
-                if i == 0:
-                    leg = plt.legend(fontsize=14, markerscale=2, title="ERF", handletextpad=0, borderaxespad=0.175, borderpad=0.2)
-                    for lh in leg.legendHandles:
-                        lh.set_alpha(1.0)
-                    plt.setp(leg.get_title(), fontsize='14')
+                    if i == 0:
+                        leg = plt.legend(fontsize=14, markerscale=2, title="ERF", handletextpad=0, borderaxespad=0.175, borderpad=0.2)
+                        for lh in leg.legendHandles:
+                            lh.set_alpha(1.0)
+                        plt.setp(leg.get_title(), fontsize=14)
 
-        ax.set_xlim(bounding_box_x)
-        ax.set_ylim(bounding_box_y)
+            ax.set_xlim(bounding_box_x)
+            ax.set_ylim(bounding_box_y)
 
-        ax.tick_params(axis='both', which='major', labelsize=15.5)
-        ax.tick_params(axis='x', which='minor', labelsize=15.5)
-        plt.grid(True, which="both")
+            ax.tick_params(axis='both', which='major', labelsize=15.5)
+            ax.tick_params(axis='x', which='minor', labelsize=15.5)
+            plt.grid(True, which="both")
 
-        if self.paper_mode:
-            ax.set_title("Vanilla Rounding Performance", fontsize=17)
-        else:
-            title = "Vanilla Rounding Performance\n"
-            #print observed_values_relative_profit
-            title += "profit:\tmin: {:.2f}; mean: {:.2f}; max: {:.2f}\n".format(np.nanmin(observed_values_relative_profit),
-                                                                                np.nanmean(observed_values_relative_profit),
-                                                                                np.nanmax(observed_values_relative_profit))
-            title += "loads:\tmin: {:.2f}; mean: {:.2f}; max: {:.2f}\n".format(np.nanmin(observed_values_load),
-                                                                               np.nanmean(observed_values_load),
-                                                                               np.nanmax(observed_values_load))
-
-            title += "{} of {} points lie outside the displayed area".format(number_of_not_shown_values, len(observed_values_relative_profit))
-            ax.set_title(title, fontsize=10)
-
-        ax.set_ylabel("$\mathrm{Max\,Load}\,({\mathrm{RR}_{\mathrm{MinLoad}}})$ [%]", fontsize=16)
-        ax.set_xlabel("$\mathrm{Profit}({\mathrm{RR}_{\mathrm{MinLoad}}}) / \mathrm{Profit}({\mathrm{MIP}_{\mathrm{MCF}}})$ [%]", fontsize=16)
-        ax.get_xaxis().set_major_formatter(matplotlib.ticker.FormatStrFormatter("%d"))
-        ax.get_xaxis().set_minor_formatter(matplotlib.ticker.FormatStrFormatter("%d"))
-
-        self._show_and_or_save_plots(output_path, filename)
-
-
-
-
-
-
-def plot_bound_ecdf(reduced_pickle_baseline, reduced_pickle_rand, filter_specifications=None, path_filename_tuple=None, saveplots=True, showplot=False, do_not_generate_plot_if_file_exists=False):
-    """
-    Plots for a given datacontainers an empirical distribution function for comparison of dual bounds.
-
-    :param reduced_pickle_baseline: unpickled datacontainer of baseline experiments (e.g. MIP)
-    :param reduced_pickle_rand: unpickled datacontainer of randomized rounding experiments
-    :param showplot: show plot after generating it (Default value = False)
-    :return:
-    """
-    spd = reduced_pickle_baseline.scenario_parameter_container.scenario_parameter_dict
-    # scenario parameter space
-    sps = reduced_pickle_baseline.scenario_parameter_container.scenarioparameter_room
-
-    scenario_ids_baseline = set(reduced_pickle_baseline.algorithm_scenario_solution_dictionary["ClassicMCF"].keys())
-
-    mip_bound_deviation = []
-
-    fix, ax = plt.subplots(figsize=(5,4))
-
-    if filter_specifications:
-        for filter_specification in filter_specifications:
-            if filter_specification['parameter'] == "number_of_requests":
-                plt.close()
-                return
-            filter_path, _ = extract_parameter_range(sps, filter_specification['parameter'])
-            filter_indices = lookup_scenarios_having_specific_values(spd, filter_path,
-                                                                     filter_specification['value'])
-            scenario_ids_baseline = scenario_ids_baseline & filter_indices
-
-    filter_path, list_number_of_requests = extract_parameter_range(sps, "number_of_requests")
-    result = [[] * len(list_number_of_requests)]
-
-    for number_of_requests in list_number_of_requests:
-        logger.debug("value: {}".format(number_of_requests))
-        filter_indices = lookup_scenarios_having_specific_values(spd, filter_path, number_of_requests) & scenario_ids_baseline
-        for scenario_id in filter_indices:
-            logger.debug("scenario_id: {}".format(scenario_id))
-            scenario_solution_baseline = reduced_pickle_baseline.get_solutions_by_scenario_index(scenario_id)["ClassicMCF"][0]
-            scenario_solution_rand = reduced_pickle_rand.get_solutions_by_scenario_index(scenario_id)["RandomizedRoundingTriumvirat"][0]
-            if scenario_solution_rand is None:
-                logger.warning("solution of scenario {} is None; will not consider it".format(scenario_id))
-                continue
-            log_time_root = 10 ** 100
-            root_entry = scenario_solution_baseline.temporal_log.root_relaxation_entry
-            if root_entry is not None:
-                log_time_root = root_entry.globaltime
-
-            first_log_entry = scenario_solution_baseline.temporal_log.log_entries[0]
-            log_time_first_entry = first_log_entry.globaltime
-            if log_time_root < log_time_first_entry:
-                mip_bound = root_entry.data.objective_bound
+            if self.paper_mode:
+                ax.set_title("Vanilla Rounding Performance", fontsize=17)
             else:
-                mip_bound = first_log_entry.data.objective_bound
+                title = "Vanilla Rounding Performance\n"
+                #print observed_values_relative_profit
+                title += "profit: min: {:.2f}; mean: {:.2f}; max: {:.2f}\n".format(np.nanmin(observed_values_relative_profit),
+                                                                                    np.nanmean(observed_values_relative_profit),
+                                                                                    np.nanmax(observed_values_relative_profit))
+                title += "loads: min: {:.2f}; mean: {:.2f}; max: {:.2f}\n".format(np.nanmin(observed_values_load),
+                                                                                   np.nanmean(observed_values_load),
+                                                                                   np.nanmax(observed_values_load))
 
-            # mip_solution = scenario_solution_baseline.status.objValue
+                title += "{} of {} points lie outside the displayed area".format(number_of_not_shown_values, len(observed_values_relative_profit))
+                ax.set_title(title, fontsize=10)
 
-            # mip_bound_time = scenario_solution_baseline.temporal_log.log_entries[0].globaltime
+            xlabel = "$\mathrm{Profit}({" + self.math_label_names[
+                data_to_plot] + "}) / \mathrm{Profit}({\mathrm{MIP}_{\mathrm{MCF}}})$ [%]"
+            ax.set_xlabel(xlabel, fontsize=16)
+            ylabel = "$\mathrm{Max\,Load}\,({" + self.math_label_names[data_to_plot] + "})$ [%]"
+            ax.set_ylabel(ylabel, fontsize=16)
+            ax.get_xaxis().set_major_formatter(matplotlib.ticker.FormatStrFormatter("%d"))
+            ax.get_xaxis().set_minor_formatter(matplotlib.ticker.FormatStrFormatter("%d"))
 
-            novel_bound = scenario_solution_rand.meta_data.status.objValue
+            self._show_and_or_save_plots(output_path, filename)
 
-            # for log_entry in scenario_solution_baseline.temporal_log.log_entries:
-            #    print log_entry
-
-            if novel_bound > 0.0:
-                mip_bound_deviation.append(mip_bound / novel_bound)
-
-            if mip_bound > 1.1 * novel_bound:
-                # print "mip solution is {}".format(mip_solution)
-                # print "mip bound at time {} is {}".format(mip_bound_time, mip_bound)
-                # print "novel bound is {}".format(novel_bound)
-                # print "\n\n"
-                pass
-
-        sorted = np.sort(np.array(mip_bound_deviation))
-        yvals = np.arange(len(sorted)) / float(len(sorted))
-
-        ax.plot(sorted, yvals, label="#requests: {}".format(number_of_requests))
-
-    ax.grid(True, which="both")
-
-    ax.set_xlim([0.5, 9.0])
-    ax.set_ylim([0, 1.0])
-
-    ax.set_xscale("log", basex=2)
-
-    ticks = [2 ** p for p in range(-1, 4)]
-    ax.set_xticks(ticks, minor=False)
-    ax.set_xticklabels(ticks, minor=False)
-
-    yticks = [0.1, 0.3, 0.5, 0.7, 0.9]
-    ax.set_yticks(yticks, minor=True)
-
-    plt.xlabel("MIP dual bound / novel dual bound", fontsize=16)
-    plt.ylabel("ECDF", fontsize=16)
-    plt.title("Comparison of dual bounds (root linear programming relaxation)", fontsize=17)
-    plt.tight_layout()
-    plt.legend(loc="lower right", fontsize=15)
-
-    if saveplots:
-        output_path, filename = construct_output_path_and_filename({'filename': 'ECDF_bound'},
-                                           {'filename': 'generalplot'},
-                                           filter_specifications=filter_specifications)
-        if not os.path.exists(output_path):
-            os.makedirs(output_path)
-        if do_not_generate_plot_if_file_exists and os.path.exists(filename):
-            print "skipping {} as this file already exists".format(filename)
-            plt.close()
-            return
-        print "saving plot: {}".format(filename)
-        plt.savefig(filename)
-    if showplot:
-        plt.show()
-
-    plt.close()
-
-
-def scatter_obj_load(reduced_pickle_baseline, reduced_pickle_rand, filter_specifications=None, forbidden_scenario_ids=None, saveplots=False, do_not_generate_plot_if_file_exists=False):
-    plt.close()
-    spd = reduced_pickle_baseline.scenario_parameter_container.scenario_parameter_dict
-    # scenario parameter space
-    sps = reduced_pickle_baseline.scenario_parameter_container.scenarioparameter_room
-
-    scenario_ids_baseline = set(reduced_pickle_baseline.algorithm_scenario_solution_dictionary["ClassicMCF"].keys())
-
-    x = [[], [], [], []]
-    y = [[], [], [], []]
-    labels = ["min. augmentation",
-              "max. profit",
-              "randomized rounding (w/o augmentation)",
-              "multi-dimensional knapsack"]
-    markers = ['o', 'v', 'x', '+']
-    colors = ['r', 'g', 'b', 'k']
-
-    if filter_specifications:
-        for filter_specification in filter_specifications:
-            filter_path, _ = extract_parameter_range(sps, filter_specification['parameter'])
-            filter_indices = lookup_scenarios_having_specific_values(spd, filter_path,
-                                                                     filter_specification['value'])
-            scenario_ids_baseline = scenario_ids_baseline & filter_indices
-
-    if forbidden_scenario_ids:
-        scenario_ids_baseline = scenario_ids_baseline - forbidden_scenario_ids
-
-    for scenario_id in scenario_ids_baseline:
-        scenario_solution_baseline = reduced_pickle_baseline.get_solutions_by_scenario_index(scenario_id)["ClassicMCF"][
-            0]
-        scenario_solution_rand = reduced_pickle_rand.get_solutions_by_scenario_index(scenario_id)["RandomizedRoundingTriumvirat"][0]
-        if scenario_solution_rand is None:
-            print "solution of scenario {} is None; will not consider it".format(scenario_id)
-            continue
-
-        # print scenario_solution_rand
-        # print "\n\n"
-
-        mip_solution = scenario_solution_baseline.status.objValue
-
-        if mip_solution < 0.01:
-            continue
-
-        data = [scenario_solution_rand.collection_of_samples_with_violations[0],
-                scenario_solution_rand.collection_of_samples_with_violations[1],
-                scenario_solution_rand.result_wo_violations,
-                scenario_solution_rand.mdk_result]
-
-        for i, dat in enumerate(data):
-            x[i].append((dat.profit / mip_solution) * 100)
-        for i, dat in enumerate(data):
-            y[i].append((max(dat.max_node_load, dat.max_edge_load) * 100))
-
-    fig, ax = plt.subplots(figsize=(9, 4))
-    plt.xscale("log")
-
-    #plt.minorticks_on()
-
-
-    ax.set_xlim([25, 400])
-    ax.set_ylim([0, 600])
-
-    ax.set_xlim((50, 250))
-    ax.set_ylim((0, 550))
-
-
-    #xticks = [50.0, 80.0, 100.0, 130.0, 200.0]
-    #ax.set_xticks(xticks, minor=False)
-    ax.tick_params(axis='both', which='major', labelsize=15.5)
-    ax.tick_params(axis='x', which='minor', labelsize=15.5)
-    plt.grid(True, which="both")
-
-    #plt.minorticks_off()
-
-    #plt.grid(b=True, which='minor', color='k', linestyle=':')
-
-    for i in range(1, -1, -1):
-        ax.scatter(x[i], y[i], c=colors[i], marker=markers[i], label=labels[i], s=10, linewidths=.1, alpha=.6)
-
-    leg = plt.legend(loc="upper left", fontsize=16, markerscale=2., scatterpoints=3)
-
-    for lh in leg.legendHandles:
-        lh.set_alpha(1.0)
-
-    ax.set_title("Vanilla Randomized Rounding Performance", fontsize=17)
-    ax.set_ylabel("maximal load [%]", fontsize=16)
-    ax.set_xlabel("profit relative to baseline solution [%]", fontsize=16)
-    ax.get_xaxis().set_major_formatter(matplotlib.ticker.FormatStrFormatter("%d"))
-    ax.get_xaxis().set_minor_formatter(matplotlib.ticker.FormatStrFormatter("%d"))
-    plt.tight_layout()
-    if saveplots:
-        output_path, filename = construct_output_path_and_filename({'filename': 'scatterplot_obj_vs_load'},
-                                                                   {'filename': 'generalplot'},
-                                                                   filter_specifications=filter_specifications)
-        if not os.path.exists(output_path):
-            os.makedirs(output_path)
-        if do_not_generate_plot_if_file_exists and os.path.exists(filename):
-            print "skipping {} as this file already exists".format(filename)
-            plt.close()
-            return
-        print "saving plot: {}".format(filename)
-        plt.savefig(filename)
-
-    plt.close()
-
-    fix, ax = plt.subplots(figsize=(6,5))
-
-    sorted_x = [[], [], [], []]
-    for i in range(len(x)):
-        sorted_x[i] = np.sort(x[i])
-
-    yvals = np.arange(len(sorted_x[0])) / float(len(sorted_x[0]))
-
-    for i in range(len(x)):
-        ax.plot(sorted_x[i], yvals, label=labels[i])
-
-    plt.grid(True, which="both")
-
-    plt.legend(loc="upper left")
-    ax.set_title("ECDF of empirical Approximation Ratios")
-    ax.set_xlabel("achieved profit w.r.t. MIP solution (100% means equal profit)")
-    ax.set_ylabel("ECDF")
-    plt.tight_layout()
-    if saveplots:
-        output_path, filename = construct_output_path_and_filename({'filename': 'ECDF_profit'},
-                                                                   {'filename': 'generalplot'},
-                                                                   filter_specifications=filter_specifications)
-        if not os.path.exists(output_path):
-            os.makedirs(output_path)
-        if do_not_generate_plot_if_file_exists and os.path.exists(filename):
-            print "skipping {} as this file already exists".format(filename)
-            plt.close()
-            return
-        print "saving plot: {}".format(filename)
-        plt.savefig(filename)
-
-    plt.close()
-
-    fix, ax = plt.subplots(figsize=(6,5))
-
-    sorted_y = [[], [], [], []]
-    for i in range(len(x)):
-        sorted_y[i] = np.sort(y[i])
-
-    for i in range(0, 2):
-        ax.plot(sorted_y[i], yvals, label=labels[i])
-
-    plt.legend(loc="upper left")
-    ax.set_title("ECDF of Capacity Violations")
-    ax.set_xlabel("Maximally Observed Capacity Violations")
-    ax.set_ylabel("ECDF")
-    ticks = [100* (p/2.0) for p in range(1, 13)]
-    ax.set_xticks(ticks, minor=False)
-    ax.set_xticklabels(ticks, minor=False)
-    ax.grid(True, which="major")
-
-    plt.tight_layout()
-    if saveplots:
-        output_path, filename = construct_output_path_and_filename({'filename': 'ECDF_capacity_violations'},
-                                                                   {'filename': 'generalplot'},
-                                                                   filter_specifications=filter_specifications)
-        if not os.path.exists(output_path):
-            os.makedirs(output_path)
-        if do_not_generate_plot_if_file_exists and os.path.exists(filename):
-            print "skipping {} as this file already exists".format(filename)
-            plt.close()
-            return
-        print "saving plot: {}".format(filename)
-        plt.savefig(filename)
-
-    plt.close()
-
-
-def _construct_filter_specs(scenario_parameter_space_dict, maxdepth=3):
-    parameter_filters = ["number_of_requests", "edge_resource_factor", "node_resource_factor"]
+def _construct_filter_specs(scenario_parameter_space_dict, parameter_filter_keys, maxdepth=3):
     parameter_value_dic = dict()
-    for parameter in parameter_filters:
+    for parameter in parameter_filter_keys:
         _, parameter_values = extract_parameter_range(scenario_parameter_space_dict,
                                                       parameter)
         parameter_value_dic[parameter] = parameter_values
@@ -1656,155 +1497,144 @@ def _construct_filter_specs(scenario_parameter_space_dict, maxdepth=3):
 
     return result_list
 
-def plot_heatmaps(dc_baseline,
-                  dc_randround,
-                  metric_specifications=global_heatmap_specfications,
-                  heatmap_axes_specifications=global_heatmap_axes_specifications,
-                  show_plot=False,
-                  save_plot=True,
-                  overwrite_existing_files=True,
-                  forbidden_scenario_ids=None,
-                  plot_ecdf=True,
-                  plot_scatter=True,
-                  papermode=True,
-                  maxdepthfilter=2,
-                  output_path="./",
-                  output_filetype="png"):
-    """ Main function for evaluation, creating plots and saving them in a specific directory hierarchy. Each metric
-    specification and each axes specification combination will be an heatmap plot. Additionally permutation of length 3
-    with all scenarioparametergeneration will be generated and fixed for plotting. This leads to the directory hierarchy.
-    For examples number_of_req_20 will be the directory which containing plots where parameter number_of_req is fixed
-    to 20. ECDF and scatter plots will be also plotted as default.
+def evaluate_baseline_and_randround(dc_baseline,
+                                    baseline_algorithm_id,
+                                    baseline_execution_config,
+                                    dc_randround,
+                                    randround_algorithm_id,
+                                    randround_execution_config,
+                                    exclude_generation_parameters=None,
+                                    parameter_filter_keys=None,
+                                    show_plot=False,
+                                    save_plot=True,
+                                    overwrite_existing_files=True,
+                                    forbidden_scenario_ids=None,
+                                    papermode=True,
+                                    maxdepthfilter=2,
+                                    output_path="./",
+                                    output_filetype="png"):
+    """ Main function for evaluation, creating plots and saving them in a specific directory hierarchy.
+    A large variety of plots is created. For heatmaps, a generic plotter is used while for general
+    comparison plots (ECDF and scatter) an own class is used. The plots that shall be generated cannot
+    be controlled at the moment but the respective plotters can be easily adjusted.
 
     :param dc_baseline: unpickled datacontainer of baseline experiments (e.g. MIP)
+    :param baseline_algorithm_id: algorithm id of the baseline algorithm
+    :param baseline_execution_config: execution config (numeric) of the baseline algorithm execution
     :param dc_randround: unpickled datacontainer of randomized rounding experiments
-    :param metric_specifications: metric specifications used by plots (Default value = global_metric_specifications)
-    :param heatmap_axes_specifications: each axes specifications used as x/y axis in plots (Default value = global_metric_specifications)
-    :param show_plot: show plot after generating it (Default value = False)
-    :param save_plot: save plots to given structure (Default value = False)
-    :param overwrite_existing_files: True if you want to overwrite existing plots (Default value = True)
-    :param forbidden_scenario_ids: List of scenario ids which should NOT be included in evaluation (Default value = None)
-    :param plot_ecdf: plot ECDF plots (Default = True)
-    :param plot_scatter: plot scatter plots (Default = True)
-    :param maxdepthfilter: Permutation legnth for scenarioparametergeneration (Default = 2)
-    :return:
+    :param randround_algorithm_id: algorithm id of the randround algorithm
+    :param randround_execution_config: execution config (numeric) of the randround algorithm execution
+    :param exclude_generation_parameters:   specific generation parameters that shall be excluded from the evaluation.
+                                            These won't show in the plots and will also not be shown on axis labels etc.
+    :param parameter_filter_keys:   name of parameters according to which the results shall be filtered
+    :param show_plot:               Boolean: shall plots be shown
+    :param save_plot:               Boolean: shall the plots be saved
+    :param overwrite_existing_files:   shall existing files be overwritten?
+    :param forbidden_scenario_ids:     list / set of scenario ids that shall not be considered in the evaluation
+    :param papermode:                  nicely layouted plots (papermode) or rather additional information?
+    :param maxdepthfilter:             length of filter permutations that shall be considered
+    :param output_path:                path to which the results shall be written
+    :param output_filetype:            filetype supported by matplotlib to export figures
+    :return: None
     """
 
-    #plt.rc('text', usetex=True)
-    #plt.rc('font', family='serif')
+    if forbidden_scenario_ids is None:
+        forbidden_scenario_ids = set()
 
-    filter_path_number_of_requests, list_number_of_requests = extract_parameter_range(dc_baseline.scenario_parameter_container.scenarioparameter_room,
-                                                                                      "number_of_requests")
+    if exclude_generation_parameters is not None:
+        for key, values_to_exclude in exclude_generation_parameters.iteritems():
+            parameter_filter_path, parameter_values = extract_parameter_range(
+                dc_baseline.scenario_parameter_container.scenarioparameter_room, key)
 
-    forbidden_scenario_ids = set(lookup_scenarios_having_specific_values(dc_baseline.scenario_parameter_container.scenario_parameter_dict, filter_path_number_of_requests, 20))
+            parameter_dicts_baseline = lookup_scenario_parameter_room_dicts_on_path(
+                dc_baseline.scenario_parameter_container.scenarioparameter_room, parameter_filter_path)
+            parameter_dicts_randround = lookup_scenario_parameter_room_dicts_on_path(
+                dc_randround.scenario_parameter_container.scenarioparameter_room, parameter_filter_path)
 
+            for value_to_exclude in values_to_exclude:
 
-    #print filter_path_number_of_requests
+                if value_to_exclude not in parameter_values:
+                    raise RuntimeError("The value {} is not contained in the list of parameter values {} for key {}".format(
+                        value_to_exclude, parameter_values, key
+                    ))
 
-    # print dc_baseline.scenario_parameter_container.scenarioparameter_room['request_generation'][0]['cactus']['CactusRequestGenerator']['number_of_requests']
+                #add respective scenario ids to the set of forbidden scenario ids
+                forbidden_scenario_ids.update(set(lookup_scenarios_having_specific_values(
+                    dc_baseline.scenario_parameter_container.scenario_parameter_dict, parameter_filter_path, value_to_exclude)))
 
-    dc_baseline.scenario_parameter_container.scenarioparameter_room['request_generation'][0]['cactus'][
-        'CactusRequestGenerator']['number_of_requests'] = \
-    dc_baseline.scenario_parameter_container.scenarioparameter_room['request_generation'][0]['cactus'][
-        'CactusRequestGenerator']['number_of_requests'][1:5]
-
-    dc_randround.scenario_parameter_container.scenarioparameter_room['request_generation'][0]['cactus'][
-        'CactusRequestGenerator']['number_of_requests'] = \
-        dc_randround.scenario_parameter_container.scenarioparameter_room['request_generation'][0]['cactus'][
-        'CactusRequestGenerator']['number_of_requests'][1:5]
-
-    # filter_path_number_of_requests, list_number_of_requests = extract_parameter_range(
-    #     dc_baseline.scenario_parameter_container.scenarioparameter_room,
-    #     "number_of_requests")
-    #
-    # print list_number_of_requests
-
-
-    #list_number_of_requests = list_number_of_requests[1:5]
-
-    filter_specs = _construct_filter_specs(dc_baseline.scenario_parameter_container.scenarioparameter_room,
-                                           maxdepth=maxdepthfilter)
-
-    paper_mode = papermode
+            #remove the respective values from the scenario parameter room such that these are not considered when
+            #constructing e.g. axes
+            parameter_dicts_baseline[-1][key] = [value for value in parameter_dicts_baseline[-1][key] if
+                                                 value not in values_to_exclude]
+            parameter_dicts_randround[-1][key] = [value for value in parameter_dicts_randround[-1][key] if
+                                                  value not in values_to_exclude]
 
 
+    if parameter_filter_keys is not None:
+        filter_specs = _construct_filter_specs(dc_baseline.scenario_parameter_container.scenarioparameter_room,
+                                               parameter_filter_keys,
+                                               maxdepth=maxdepthfilter)
+    else:
+        filter_specs = [None]
 
+    #initialize plotters
 
     baseline_plotter = SingleHeatmapPlotter(output_path=output_path,
                                             output_filetype=output_filetype,
                                             scenario_solution_storage=dc_baseline,
-                                            algorithm_id="ClassicMCF",
-                                            execution_id=0,
+                                            algorithm_id=baseline_algorithm_id,
+                                            execution_id=baseline_execution_config,
                                             heatmap_plot_type=HeatmapPlotType.Simple_MCF,
                                             show_plot=show_plot,
                                             save_plot=save_plot,
                                             overwrite_existing_files=overwrite_existing_files,
-                                            forbidden_scenario_ids=None,
-                                            paper_mode=paper_mode)
+                                            forbidden_scenario_ids=forbidden_scenario_ids,
+                                            paper_mode=papermode)
 
     randround_plotter = SingleHeatmapPlotter(output_path=output_path,
                                             output_filetype=output_filetype,
                                             scenario_solution_storage=dc_randround,
-                                            algorithm_id="RandomizedRoundingTriumvirat",
-                                            execution_id=0,
+                                            algorithm_id=randround_algorithm_id,
+                                            execution_id=randround_execution_config,
                                             heatmap_plot_type=HeatmapPlotType.Simple_RRT,
                                             show_plot=show_plot,
                                             save_plot=save_plot,
                                             overwrite_existing_files=overwrite_existing_files,
-                                            forbidden_scenario_ids=None,
-                                            paper_mode=paper_mode)
+                                            forbidden_scenario_ids=forbidden_scenario_ids,
+                                            paper_mode=papermode)
 
     comparison_plotter = ComparisonHeatmapPlotter(output_path=output_path,
                                                   output_filetype=output_filetype,
                                                   scenario_solution_storage=dc_baseline,
-                                                  algorithm_id="ClassicMCF",
-                                                  execution_id=0,
+                                                  algorithm_id=baseline_algorithm_id,
+                                                  execution_id=baseline_execution_config,
                                                   other_scenario_solution_storage=dc_randround,
-                                                  other_algorithm_id="RandomizedRoundingTriumvirat",
-                                                  other_execution_id=0,
+                                                  other_algorithm_id=randround_algorithm_id,
+                                                  other_execution_id=randround_execution_config,
                                                   heatmap_plot_type=HeatmapPlotType.Comparison_MCF_vs_RRT,
                                                   show_plot=show_plot,
                                                   save_plot=save_plot,
                                                   overwrite_existing_files=overwrite_existing_files,
-                                                  forbidden_scenario_ids=None,
-                                                  paper_mode=paper_mode)
+                                                  forbidden_scenario_ids=forbidden_scenario_ids,
+                                                  paper_mode=papermode)
 
     ecdf_capacity_violation_plotter = ComparisonBaselineVsRRT_Scatter_and_ECDF(output_path=output_path,
                                                                                output_filetype=output_filetype,
                                                                                baseline_solution_storage=dc_baseline,
-                                                                               baseline_algorithm_id="ClassicMCF",
-                                                                               baseline_execution_id=0,
+                                                                               baseline_algorithm_id=baseline_algorithm_id,
+                                                                               baseline_execution_id=baseline_execution_config,
                                                                                randround_solution_storage=dc_randround,
-                                                                               randround_algorithm_id="RandomizedRoundingTriumvirat",
-                                                                               randround_execution_id=0,
+                                                                               randround_algorithm_id=randround_algorithm_id,
+                                                                               randround_execution_id=randround_execution_config,
                                                                                show_plot=show_plot,
                                                                                save_plot=save_plot,
                                                                                overwrite_existing_files=overwrite_existing_files,
                                                                                forbidden_scenario_ids=forbidden_scenario_ids,
-                                                                               paper_mode=paper_mode)
+                                                                               paper_mode=papermode)
 
     plotters = [ecdf_capacity_violation_plotter, baseline_plotter, randround_plotter, comparison_plotter]
 
     for filter_spec in filter_specs:
 
-        # if plot_scatter:
-        #     scatter_obj_load(dc_baseline, dc_randround, filter_specifications=filter_spec, saveplots=save_plot, do_not_generate_plot_if_file_exists=do_not_generate_plot_if_file_exists)
-        #
-        # if plot_ecdf:
-        #     plot_bound_ecdf(dc_baseline, dc_randround, filter_specifications=filter_spec, saveplots=save_plot, do_not_generate_plot_if_file_exists=do_not_generate_plot_if_file_exists)
-
         for plotter in plotters:
             plotter.plot_figure(filter_spec)
-
-        # for metric_specfication in metric_specifications:
-        #     for axes_speci in heatmap_axes_specifications:
-        #
-        #         plot_single_heatmap_general(dc_baseline,
-        #                                     dc_randround,
-        #                                     metric_specfication,
-        #                                     axes_speci,
-        #                                     filter_specifications=filter_spec,
-        #                                     show_plot=False,
-        #                                     save_plot=save_plot,
-        #                                     do_not_generate_plot_if_file_exists=overwrite_existing_files,
-        #                                     )

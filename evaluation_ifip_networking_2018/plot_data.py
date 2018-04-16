@@ -1,19 +1,33 @@
+# MIT License
+#
+# Copyright (c) 2016-2018 Matthias Rost, Elias Doehne, Alexander Elvers
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+#
+
 import os
 import pickle
-import sys
 from collections import namedtuple
-from itertools import combinations, product
-from time import gmtime, strftime
-
-import matplotlib.patheffects as PathEffects
-import matplotlib.pyplot as plt
-import numpy as np
 
 from alib import solutions, util
 
-from . import randomized_rounding
-
-#sys.path.insert(0, os.path.abspath('../'))
+from vnep_approx import randomized_rounding_triumvirate
 
 REQUIRED_FOR_PICKLE = solutions  # this prevents pycharm from removing this import, which is required for unpickling solutions
 
@@ -149,11 +163,11 @@ class RandRoundResultReducer(object):
         # set the time of both to avg_runtime
         best_feasible = best_feasible._asdict()
         best_feasible["time_to_round_solution"] = avg_runtime
-        best_feasible = randomized_rounding.RandomizedRoundingSolutionData(**best_feasible)
+        best_feasible = randomized_rounding_triumvirate.RandomizedRoundingSolutionData(**best_feasible)
 
         best_objective = best_objective._asdict()
         best_objective["time_to_round_solution"] = avg_runtime
-        best_objective = randomized_rounding.RandomizedRoundingSolutionData(**best_objective)
+        best_objective = randomized_rounding_triumvirate.RandomizedRoundingSolutionData(**best_objective)
 
         solution.collection_of_samples_with_violations.append(best_feasible)
         solution.collection_of_samples_with_violations.append(best_objective)
