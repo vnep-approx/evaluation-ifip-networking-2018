@@ -5,6 +5,8 @@
 
 export ALIB_EXPERIMENT_HOME=$(pwd)
 
+mkdir -p log/ && mkdir -p input && mkdir -p output
+
 function move_logs_and_output() {
 	mkdir -p old_logs
 	echo "make sure to check the logs for errors and that the generated output is correct"
