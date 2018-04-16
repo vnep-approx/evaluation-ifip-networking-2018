@@ -1,0 +1,21 @@
+SCENARIO_PICKLE: "ifip_networking_evaluation_scenarios.pickle"
+RUN_PARAMETERS:
+    - ALGORITHM:
+        ID: ClassicMCF
+            
+        GUROBI_PARAMETERS:
+            timelimit: [10800]
+            threads: [1]
+            mipGap: [0.01]
+            iterationLimit: [null]
+            nodeLimit: [null]
+            heuristics: [null]
+            MIPFocus: [null]
+            rootCutPasses: [null]
+            cuts: [null]
+            BarConvTol: [null]
+            OptimalityTol: [null]
+            Presolve: [null]
+            NodefileStart: [null]
+            Method: [null]
+            NodeMethod: [null]
