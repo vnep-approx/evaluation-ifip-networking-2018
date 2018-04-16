@@ -1,10 +1,12 @@
-SCENARIO_PICKLE: "ifip_networking_evaluation_scenarios.pickle"
+SCENARIO_INPUT_PICKLE: "ifip_networking_evaluation_scenarios.pickle"
+RESULT_OUTPUT_PICKLE:  "ifip_networking_evaluation_solutions_rand_round.pickle"
+
 RUN_PARAMETERS:
     - ALGORITHM:
         ID: RandomizedRoundingTriumvirate
 
         GUROBI_PARAMETERS:
-            timelimit: [3600]
-            threads: [1]
-            numericfocus: [2]
-            method: [2]
+            timelimit: [600]	#limit runtime of the barrier algorithm to one hour
+            threads: [1]	#use a single thread
+            numericfocus: [2]	#increase numeric focus as the models are huge at times
+            method: [2]		#barrier algorithm

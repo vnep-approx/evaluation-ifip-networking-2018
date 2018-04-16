@@ -1,21 +1,11 @@
-SCENARIO_PICKLE: "ifip_networking_evaluation_scenarios.pickle"
+SCENARIO_INPUT_PICKLE: "ifip_networking_evaluation_scenarios.pickle"
+RESULT_OUTPUT_PICKLE: "ifip_networking_evaluation_solutions_MIP_baseline.pickle"
+
 RUN_PARAMETERS:
     - ALGORITHM:
         ID: ClassicMCF
             
         GUROBI_PARAMETERS:
-            timelimit: [10800]
-            threads: [1]
-            mipGap: [0.01]
-            iterationLimit: [null]
-            nodeLimit: [null]
-            heuristics: [null]
-            MIPFocus: [null]
-            rootCutPasses: [null]
-            cuts: [null]
-            BarConvTol: [null]
-            OptimalityTol: [null]
-            Presolve: [null]
-            NodefileStart: [null]
-            Method: [null]
-            NodeMethod: [null]
+            timelimit: [10800]	#maximal runtime of 3 hours
+            threads: [1]	#one thread for gurobi (per scenario)
+            mipGap: [0.01]	#terminate after having reached a solution less than 1% away from the optimum

@@ -34,10 +34,14 @@ substrate_generation:
             topology: [Geant2012]                               #1
             node_types: [[universal]]
             node_capacity: [100.0]
-            node_cost_factor: [1.0]                             #this is a multiplicative factor :)
+            node_cost_factor: [1.0]                             
             edge_capacity: [100.0]
             node_type_distribution: [1.0]
 
-scenario_repetition: 25                                         #15
+scenario_repetition: 15                                         #15
                                                                 #1875 overall
+
+# Note that in the evaluation the scenarios with 20 requests were not considered, as for these at time not a single
+# request was feasible and the number of feasible scenarios in general is very small. The results were not really meaningful.
+# Accordingly, our evaluation only reports on the scenarios with 40, 60, 80, or 100 requests (yielding 1500 scenarios overall).
 
