@@ -86,7 +86,7 @@ class BaselineResultReducer(object):
                             for ve, sedge_list in mappings[req].mapping_edges.iteritems():
                                 edge_demand = req.get_edge_demand(ve)
                                 for sedge in sedge_list:
-                                    load[sedge] = edge_demand
+                                    load[sedge] += edge_demand
                     percentage_embbed = number_of_embedde_reqs / float(number_of_requests)
                     algo_result = ssd[algorithm][scenario_id][exec_id]
                     ssd[algorithm][scenario_id][exec_id] = ReducedBaselineSolution(
