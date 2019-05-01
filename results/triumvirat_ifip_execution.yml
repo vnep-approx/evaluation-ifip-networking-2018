@@ -6,7 +6,7 @@ RUN_PARAMETERS:
         ID: RandomizedRoundingTriumvirate
 
         GUROBI_PARAMETERS:
-            timelimit: [600]	#limit runtime of the barrier algorithm to one hour
+            timelimit: [3600]	#limit runtime of the barrier algorithm to one hour
             threads: [1]	#use a single thread
             numericfocus: [2]	#increase numeric focus as the models are huge at times
             method: [2]		#barrier algorithm
