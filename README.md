@@ -29,7 +29,7 @@ to
 
 # Dependencies and Requirements
 
-The **vnep_approx** library requires Python 2.7. Required python libraries: gurobipy, numpy, cPickle, networkx 1.9, matplotlib, and **[alib](https://github.com/vnep-approx/alib)**. 
+The **vnep_approx** library requires Python 2.7. Required python libraries: gurobipy, numpy, cPickle, networkx, matplotlib, and **[alib](https://github.com/vnep-approx/alib)**, and . 
 
 Gurobi must be installed and the .../gurobi64/lib directory added to the environment variable LD_LIBRARY_PATH.
 
@@ -117,7 +117,7 @@ python setup.py install             #install gurobipy within (!) the virtual env
 ```
 
 Then, assuming that all packages, i.e. **alib, vnep_approx**, and **evaluation_ifip_networking_2018**, are downloaded 
-/ cloned to the same directory, simply execute the following within each of the packages' root directory:
+/ cloned to the same directory, simply execute the following within each of the packages' root directories:
 
 ```
 pip install -e .
